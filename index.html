@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; }
+  iframe { width: 100vw; height: 100vh; border: none; display: block; }
+  #controls {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 99;
+  }
+  button {
+    font-family: sans-serif; font-size: 13px; font-weight: 500;
+    padding: 6px 16px; border-radius: 20px; cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.5); color: #fff;
+  }
+  button.active { background: rgba(255,255,255,0.9); color: #111; border-color: #fff; }
+  #bar { position: fixed; bottom: 0; left: 0; height: 3px;
+    background: rgba(255,255,255,0.6); width: 0; }
+  #label { position: fixed; top: 12px; right: 14px;
+    font-family: sans-serif; font-size: 12px; color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 12px; cursor: pointer; }
+</style>
+</head>
+<body>
+<iframe id="map"></iframe>
+<div id="label">Auto ▶</div>
+<div id="controls">
+  <button data-i="0" class="active">Radar</button>
+  <button data-i="1">Wind</button>
+  <button data-i="2">Temperature</button>
+</div>
+<div id="bar"></div>
+<script>
+const BASE = 'https://embed.windy.com/embed2.html?lat=39.982&lon=-105.190&detailLat=39.982&detailLon=-105.190&zoom=11&level=surface&menu=&message=&marker=&calendar=now&type=map&location=coordinates&metricWind=default&metricTemp=default';
+const VIEWS = [
+  BASE + '&overlay=radar&product=radar&radarRange=-1',
+  BASE + '&overlay=wind&product=ecmwf',
+  BASE + '&overlay=temp&product=ecmwf'
+];
+const MS = 15000;
+let cur = 0, auto = true, timer;
+const map = document.getElementById('map');
+const btns = document.querySelectorAll('button');
+const bar = document.getElementById('bar');
+const lbl = document.getElementById('label');
+
+function go(i, manual) {
+  cur = i;
+  map.src = VIEWS[i];
+  btns.forEach((b, j) => b.classList.toggle('active', j === i));
+  if (manual) { auto = false; lbl.textContent = 'Auto ▶'; clearInterval(timer); resetBar(); }
+}
+function resetBar() { bar.style.transition = 'none'; bar.style.width = '0%'; }
+function startBar() {
+  resetBar();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    bar.style.transition = `width ${MS}ms linear`;
+    bar.style.width = '100%';
+  }));
+}
+function startAuto() {
+  auto = true; lbl.textContent = 'Auto ⏸';
+  timer = setInterval(() => { cur = (cur + 1) % 3; go(cur, false); startBar(); }, MS);
+  startBar();
+}
+lbl.addEventListener('click', () => auto ? (auto=false, lbl.textContent='Auto ▶', clearInterval(timer), resetBar()) : startAuto());
+btns.forEach(b => b.addEventListener('click', () => go(+b.dataset.i, true)));
+go(0, false);
+startAuto();
+</script>
+</body>
+</html>
