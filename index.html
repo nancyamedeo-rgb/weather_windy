@@ -28,7 +28,7 @@
 <iframe id="map"></iframe>
 <div id="label">Auto ▶</div>
 <div id="controls">
-  <button data-i="0" class="active">Radar</button>
+  <button data-i="0" class="active">Clouds</button>
   <button data-i="1">Wind</button>
   <button data-i="2">Temperature</button>
 </div>
@@ -36,7 +36,7 @@
 <script>
 const BASE = 'https://embed.windy.com/embed2.html?lat=39.982&lon=-105.190&detailLat=39.982&detailLon=-105.190&zoom=11&level=surface&menu=&message=&marker=&calendar=now&type=map&location=coordinates&metricWind=default&metricTemp=default';
 const VIEWS = [
-  BASE + '&overlay=radar&product=radar&radarRange=-1',
+  BASE + '&overlay=clouds&product=ecmwf',
   BASE + '&overlay=wind&product=ecmwf',
   BASE + '&overlay=temp&product=ecmwf'
 ];
@@ -46,7 +46,6 @@ const map = document.getElementById('map');
 const btns = document.querySelectorAll('button');
 const bar = document.getElementById('bar');
 const lbl = document.getElementById('label');
-
 function go(i, manual) {
   cur = i;
   map.src = VIEWS[i];
